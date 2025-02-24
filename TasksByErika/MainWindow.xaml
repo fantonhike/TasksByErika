@@ -1,0 +1,135 @@
+﻿<Window x:Class="OfflineCalendar.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:OfflineCalendar"
+        Title="Tasks by Erika" Height="500" Width="800"
+        Loaded="Window_Loaded"
+        Closing="Window_Closing"
+        Background="#2d2d2d"
+        FontFamily="Segoe UI">
+    <Window.Resources>
+        <!-- Converter for mapping color names to custom hex brushes -->
+        <local:ColorToBrushConverter x:Key="ColorToBrushConverter" />
+        <!-- Global Button Style -->
+        <Style TargetType="Button">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#f0f0f0" Offset="0.0"/>
+                        <GradientStop Color="#dcdcdc" Offset="1.0"/>
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="BorderBrush" Value="Gray"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="5" Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="3"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Padding" Value="3,2"/>
+            <Setter Property="Margin" Value="3"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <!-- Style for week list items -->
+        <Style x:Key="WeekListBoxItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Margin" Value="1.5"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="1.5"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <!-- Left panel -->
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Left Panel: Week view and navigation -->
+        <Grid Grid.Column="0" Background="#333333">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <ListBox x:Name="WeekListBox" SelectionChanged="WeekListBox_SelectionChanged"
+               Background="#333333" Foreground="White" BorderThickness="0"
+               ItemContainerStyle="{StaticResource WeekListBoxItemStyle}" />
+            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
+                <Button x:Name="PreviousWeekButton" Content="Previous Week" Click="PreviousWeekButton_Click" />
+                <Button x:Name="NextWeekButton" Content="Next Week" Click="NextWeekButton_Click" />
+            </StackPanel>
+        </Grid>
+
+        <!-- Right Panel: Toolbar, Task List, and Timeline -->
+        <Grid Grid.Column="1" Margin="10">
+            <Grid.RowDefinitions>
+                <!-- Toolbar row -->
+                <RowDefinition Height="Auto"/>
+                <!-- Task List row -->
+                <RowDefinition Height="*"/>
+                <!-- Timeline row -->
+                <RowDefinition Height="54"/>
+            </Grid.RowDefinitions>
+
+            <!-- Toolbar arranged in three columns -->
+            <Grid Grid.Row="0" Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <!-- Left-aligned: Add Task and Edit Task -->
+                <StackPanel Orientation="Horizontal" Grid.Column="0">
+                    <Button x:Name="AddTaskButton" Content="Add Task" Click="AddTaskButton_Click" />
+                    <Button x:Name="EditTaskButton" Content="Edit Task" Click="EditTaskButton_Click" Margin="3"/>
+                </StackPanel>
+                <!-- Centered: Copy Task and Paste Task -->
+                <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Center">
+                    <Button x:Name="CopyTaskButton" Content="Copy Task" Click="CopyTaskButton_Click" Margin="40,3,3,3"/>
+                    <Button x:Name="PasteTaskButton" Content="Paste Task" Click="PasteTaskButton_Click" Margin="3"/>
+                </StackPanel>
+                <!-- Right-aligned: Delete Task and Clear Week -->
+                <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Right">
+                    <Button x:Name="DeleteTaskButton" Content="Delete Task" Click="DeleteTaskButton_Click" Margin="40,3,3,3"/>
+                    <Button x:Name="ClearWeekButton" Content="Clear Week" Click="ClearWeekButton_Click" Margin="3"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Task List with GridView; double-clicking a task opens it for editing -->
+            <ListView x:Name="TasksListView" SelectionMode="Extended" Grid.Row="1" Background="#222222" Foreground="White" BorderThickness="0"
+                SizeChanged="TasksListView_SizeChanged" MouseDoubleClick="TasksListView_MouseDoubleClick">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Width="38">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Ellipse Width="12" Height="12" Fill="{Binding Color, Converter={StaticResource ColorToBrushConverter}}" Margin="5"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Time Range" Width="120">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding TimeRange}" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Title" Width="110" DisplayMemberBinding="{Binding Title}" />
+                        <!-- Notes column stretches -->
+                        <GridViewColumn Header="Notes" x:Name="notesColumn" DisplayMemberBinding="{Binding Notes}" Width="260" />
+                    </GridView>
+                </ListView.View>
+            </ListView>
+
+            <!-- Timeline Canvas -->
+            <Canvas x:Name="TimelineCanvas" Grid.Row="2" Background="#222222" Height="54" Margin="0,10,0,0"/>
+        </Grid>
+    </Grid>
+</Window>
