@@ -1,4 +1,5 @@
 # TasksByErika
+## [Download](https://github.com/fantonhike/TasksByErika/releases/tag/v1.1)
 A simple, offline day-by-day schedule software for windows.
 
 ![TasksByErika_Screenshot](https://github.com/user-attachments/assets/f1fff495-22e7-4754-8eae-12b2b7b16579)
