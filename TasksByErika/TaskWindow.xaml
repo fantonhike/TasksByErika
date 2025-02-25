@@ -35,7 +35,7 @@
 
         <!-- End Time -->
         <TextBlock Text="End Time:" Grid.Row="2" Grid.Column="0" Margin="0,0,10,10" Foreground="White" VerticalAlignment="Center"/>
-        <!-- When editing a one-time task, this remains empty -->
+        <!-- For one-time tasks, leave this empty -->
         <TextBox x:Name="EndTimeTextBox" Grid.Row="2" Grid.Column="1" Margin="0,0,0,10"/>
 
         <!-- Notes -->

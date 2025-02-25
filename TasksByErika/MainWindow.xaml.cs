@@ -140,6 +140,7 @@ namespace OfflineCalendar
             }
         }
 
+        // Double-clicking a task opens it for editing.
         private void TasksListView_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             if (TasksListView.SelectedItem is TaskItem selectedTask)
@@ -215,14 +216,56 @@ namespace OfflineCalendar
 
         private void ClearWeekButton_Click(object sender, RoutedEventArgs e)
         {
-            for (int i = 0; i < 7; i++)
+            // Confirmation popup.
+            if (MessageBox.Show("Are you sure?", "Clear Week", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
-                DateTime day = currentWeekMonday.AddDays(i);
-                if (tasksByDate.ContainsKey(day))
-                    tasksByDate.Remove(day);
+                for (int i = 0; i < 7; i++)
+                {
+                    DateTime day = currentWeekMonday.AddDays(i);
+                    if (tasksByDate.ContainsKey(day))
+                        tasksByDate.Remove(day);
+                }
+                if (WeekListBox.SelectedItem is ListBoxItem item && item.Tag is DateTime selectedDay)
+                    RefreshTasksList(selectedDay);
             }
-            if (WeekListBox.SelectedItem is ListBoxItem item && item.Tag is DateTime selectedDay)
-                RefreshTasksList(selectedDay);
+        }
+
+        private void MakeDailyButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (TasksListView.SelectedItems.Count > 0)
+            {
+                // Get the selected tasks.
+                var selectedTasks = TasksListView.SelectedItems.Cast<TaskItem>().ToList();
+                // Get the currently displayed day.
+                if (!(WeekListBox.SelectedItem is ListBoxItem currentItem))
+                    return;
+                DateTime currentDay = (DateTime)currentItem.Tag;
+                // For each day in the displayed week (except the current day), copy the tasks.
+                foreach (ListBoxItem item in WeekListBox.Items)
+                {
+                    DateTime day = (DateTime)item.Tag;
+                    if (day != currentDay)
+                    {
+                        if (!tasksByDate.ContainsKey(day))
+                            tasksByDate[day] = new ObservableCollection<TaskItem>();
+                        foreach (var task in selectedTasks)
+                        {
+                            TaskItem copy = new TaskItem
+                            {
+                                Title = task.Title,
+                                StartTime = task.StartTime,
+                                EndTime = task.EndTime,
+                                Notes = task.Notes,
+                                Color = task.Color
+                            };
+                            tasksByDate[day].Add(copy);
+                        }
+                        tasksByDate[day] = new ObservableCollection<TaskItem>(
+                            tasksByDate[day].OrderBy(t => t.StartTime));
+                    }
+                }
+                RefreshTasksList(currentDay);
+            }
         }
 
         private void PreviousWeekButton_Click(object sender, RoutedEventArgs e)
@@ -320,7 +363,7 @@ namespace OfflineCalendar
                         Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#888888")),
                         FontSize = 10
                     };
-                    // Move the label slightly down.
+                    // Move tick labels slightly down.
                     Canvas.SetLeft(textBlock, x + 2);
                     Canvas.SetTop(textBlock, canvasHeight - 15);
                     TimelineCanvas.Children.Add(textBlock);
@@ -330,7 +373,7 @@ namespace OfflineCalendar
             if (!tasksByDate.ContainsKey(selectedDay)) return;
             var tasks = tasksByDate[selectedDay];
             var sortedTasks = tasks.OrderBy(t => t.StartTime).ToList();
-            // For overlap calculations: for one-time tasks, treat them as having a 20-minute effective range (10 minutes before and 10 minutes after).
+            // For overlap: for one-time tasks, assume an effective range of 20 minutes (10 minutes before and after).
             List<TimeSpan> rowEndTimes = new List<TimeSpan>();
             Dictionary<TaskItem, int> taskRow = new Dictionary<TaskItem, int>();
             foreach (var task in sortedTasks)

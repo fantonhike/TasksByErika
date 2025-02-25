@@ -20,7 +20,7 @@ namespace OfflineCalendar
                 Task = task;
                 TitleTextBox.Text = task.Title;
                 StartTimeTextBox.Text = task.StartTime.ToString(@"hh\:mm");
-                // For one-time tasks, leave End Time empty.
+                // For one-time tasks, if EndTime equals StartTime, leave End Time empty.
                 EndTimeTextBox.Text = (task.StartTime == task.EndTime) ? "" : task.EndTime.ToString(@"hh\:mm");
                 NotesTextBox.Text = task.Notes;
                 selectedColor = task.Color;
@@ -29,7 +29,7 @@ namespace OfflineCalendar
             {
                 selectedColor = "Red";
             }
-            // Ensure the templates have been applied before updating the border.
+            // Ensure the templates are applied before updating borders.
             this.Loaded += TaskWindow_Loaded;
         }
 
@@ -67,58 +67,30 @@ namespace OfflineCalendar
             }
         }
 
+        // Enhanced time parsing: accepts one- or two-digit hours (with optional "h") as well as existing formats.
         private bool TryParseTime(string input, out TimeSpan time)
         {
             time = TimeSpan.Zero;
             input = input.Trim().ToLower();
-            // New logic: if input contains "h", remove it.
-            bool hasH = input.Contains("h");
-            if (hasH)
-            {
-                input = input.Replace("h", "");
-            }
-            // If input is all digits:
+            // Remove any "h" characters.
+            input = input.Replace("h", "");
             if (input.All(char.IsDigit))
             {
-                // If no "h", assume that a one- or two-digit number means PM (if less than 12, add 12)
-                if (!hasH)
+                if (input.Length <= 2)
                 {
-                    if (input.Length <= 2)
-                    {
-                        int hr = int.Parse(input);
-                        if (hr < 12)
-                            hr += 12;
-                        input = hr.ToString() + ":00";
-                    }
-                    else if (input.Length == 3)
-                    {
-                        input = "0" + input;
-                        if (input.Length == 4)
-                        {
-                            input = input.Insert(2, ":");
-                        }
-                    }
-                    else if (input.Length == 4)
-                    {
-                        input = input.Insert(2, ":");
-                    }
+                    int hr = int.Parse(input);
+                    // Assume that if hr < 12, it means PM.
+                    if (hr < 12) hr += 12;
+                    input = hr.ToString() + ":00";
                 }
-                else
+                else if (input.Length == 3)
                 {
-                    // If "h" was present, treat input as literal (e.g. "1" means 1:00, "1h30" becomes "1:30")
-                    if (input.Length <= 2)
-                    {
-                        input = input + ":00";
-                    }
-                    else if (input.Length == 3)
-                    {
-                        input = "0" + input;
-                        input = input.Insert(2, ":");
-                    }
-                    else if (input.Length == 4)
-                    {
-                        input = input.Insert(2, ":");
-                    }
+                    input = "0" + input;
+                    input = input.Insert(2, ":");
+                }
+                else if (input.Length == 4)
+                {
+                    input = input.Insert(2, ":");
                 }
             }
             if (TimeSpan.TryParse(input, out time))
@@ -135,7 +107,12 @@ namespace OfflineCalendar
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
             string startInput = StartTimeTextBox.Text;
-            // If End Time is blank, treat it as a one-time task (EndTime equals StartTime)
+            if (string.IsNullOrWhiteSpace(startInput))
+            {
+                MessageBox.Show("Please enter a valid start time.", "Input Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            // If End Time is blank, treat as a one-time task.
             string endInput = string.IsNullOrWhiteSpace(EndTimeTextBox.Text) ? startInput : EndTimeTextBox.Text;
             if (TryParseTime(startInput, out TimeSpan start) &&
                 TryParseTime(endInput, out TimeSpan end))
@@ -144,7 +121,7 @@ namespace OfflineCalendar
                     Task = new TaskItem();
                 Task.Title = TitleTextBox.Text;
                 Task.StartTime = start;
-                Task.EndTime = end;  // For one-time tasks, start==end.
+                Task.EndTime = end; // For one-time tasks, start==end.
                 Task.Notes = NotesTextBox.Text;
                 Task.Color = selectedColor;
                 DialogResult = true;

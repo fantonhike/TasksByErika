@@ -70,12 +70,12 @@
         <!-- Right Panel: Toolbar, Task List, and Timeline -->
         <Grid Grid.Column="1" Margin="10">
             <Grid.RowDefinitions>
-                <!-- Toolbar row -->
                 <RowDefinition Height="Auto"/>
-                <!-- Task List row -->
+                <!-- Toolbar -->
                 <RowDefinition Height="*"/>
-                <!-- Timeline row -->
+                <!-- Task List -->
                 <RowDefinition Height="54"/>
+                <!-- Timeline -->
             </Grid.RowDefinitions>
 
             <!-- Toolbar arranged in three columns -->
@@ -90,14 +90,15 @@
                     <Button x:Name="AddTaskButton" Content="Add Task" Click="AddTaskButton_Click" />
                     <Button x:Name="EditTaskButton" Content="Edit Task" Click="EditTaskButton_Click" Margin="3"/>
                 </StackPanel>
-                <!-- Centered: Copy Task and Paste Task -->
+                <!-- Centered: Copy Task, Paste Task, and Make Daily (all with equal small margins) -->
                 <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Center">
-                    <Button x:Name="CopyTaskButton" Content="Copy Task" Click="CopyTaskButton_Click" Margin="40,3,3,3"/>
+                    <Button x:Name="CopyTaskButton" Content="Copy Task" Click="CopyTaskButton_Click" Margin="3"/>
                     <Button x:Name="PasteTaskButton" Content="Paste Task" Click="PasteTaskButton_Click" Margin="3"/>
+                    <Button x:Name="MakeDailyButton" Content="Make Daily" Click="MakeDailyButton_Click" Margin="3"/>
                 </StackPanel>
-                <!-- Right-aligned: Delete Task and Clear Week -->
+                <!-- Right-aligned: Delete Task and Clear Week (margins adjusted to match left group) -->
                 <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Right">
-                    <Button x:Name="DeleteTaskButton" Content="Delete Task" Click="DeleteTaskButton_Click" Margin="40,3,3,3"/>
+                    <Button x:Name="DeleteTaskButton" Content="Delete Task" Click="DeleteTaskButton_Click" Margin="3"/>
                     <Button x:Name="ClearWeekButton" Content="Clear Week" Click="ClearWeekButton_Click" Margin="3"/>
                 </StackPanel>
             </Grid>
@@ -122,7 +123,7 @@
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
                         <GridViewColumn Header="Title" Width="110" DisplayMemberBinding="{Binding Title}" />
-                        <!-- Notes column stretches -->
+                        <!-- The Notes column stretches -->
                         <GridViewColumn Header="Notes" x:Name="notesColumn" DisplayMemberBinding="{Binding Notes}" Width="260" />
                     </GridView>
                 </ListView.View>
