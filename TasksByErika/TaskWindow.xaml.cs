@@ -20,7 +20,7 @@ namespace OfflineCalendar
                 Task = task;
                 TitleTextBox.Text = task.Title;
                 StartTimeTextBox.Text = task.StartTime.ToString(@"hh\:mm");
-                // For one-time tasks, if EndTime equals StartTime, leave End Time empty.
+                // For one-time tasks, if EndTime equals StartTime, leave EndTime empty.
                 EndTimeTextBox.Text = (task.StartTime == task.EndTime) ? "" : task.EndTime.ToString(@"hh\:mm");
                 NotesTextBox.Text = task.Notes;
                 selectedColor = task.Color;
@@ -29,7 +29,7 @@ namespace OfflineCalendar
             {
                 selectedColor = "Red";
             }
-            // Ensure the templates are applied before updating borders.
+            // Ensure control templates are applied before updating borders.
             this.Loaded += TaskWindow_Loaded;
         }
 
@@ -67,39 +67,53 @@ namespace OfflineCalendar
             }
         }
 
-        // Enhanced time parsing: accepts one- or two-digit hours (with optional "h") as well as existing formats.
+        // NEW, simplified time parsing logic:
+        // If the input contains "am" or "pm", use standard DateTime.TryParse.
+        // Otherwise, assume 24-hour time.
         private bool TryParseTime(string input, out TimeSpan time)
         {
             time = TimeSpan.Zero;
             input = input.Trim().ToLower();
+            if (input.Contains("am") || input.Contains("pm"))
+            {
+                // Use standard parsing.
+                if (DateTime.TryParse(input, CultureInfo.InvariantCulture, DateTimeStyles.NoCurrentDateDefault, out DateTime dt))
+                {
+                    time = dt.TimeOfDay;
+                    return true;
+                }
+                return false;
+            }
             // Remove any "h" characters.
             input = input.Replace("h", "");
+            // If input contains a colon, try standard parsing.
+            if (input.Contains(":"))
+            {
+                return TimeSpan.TryParse(input, out time);
+            }
+            // If input is all digits, assume it's an hour or hour+minute in 24-hour time.
             if (input.All(char.IsDigit))
             {
                 if (input.Length <= 2)
                 {
+                    // e.g. "8" or "08" -> 08:00
                     int hr = int.Parse(input);
-                    // Assume that if hr < 12, it means PM.
-                    if (hr < 12) hr += 12;
-                    input = hr.ToString() + ":00";
+                    time = TimeSpan.FromHours(hr);
+                    return true;
                 }
                 else if (input.Length == 3)
                 {
-                    input = "0" + input;
+                    // e.g. "800" -> "08:00"
+                    input = "0" + input; // e.g., "0800"
                     input = input.Insert(2, ":");
+                    return TimeSpan.TryParse(input, out time);
                 }
                 else if (input.Length == 4)
                 {
+                    // e.g. "2000" -> "20:00"
                     input = input.Insert(2, ":");
+                    return TimeSpan.TryParse(input, out time);
                 }
-            }
-            if (TimeSpan.TryParse(input, out time))
-                return true;
-            DateTime dt;
-            if (DateTime.TryParse(input, out dt))
-            {
-                time = dt.TimeOfDay;
-                return true;
             }
             return false;
         }
@@ -112,11 +126,17 @@ namespace OfflineCalendar
                 MessageBox.Show("Please enter a valid start time.", "Input Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            // If End Time is blank, treat as a one-time task.
+            // If End Time is blank, treat as one-time task.
             string endInput = string.IsNullOrWhiteSpace(EndTimeTextBox.Text) ? startInput : EndTimeTextBox.Text;
             if (TryParseTime(startInput, out TimeSpan start) &&
                 TryParseTime(endInput, out TimeSpan end))
             {
+                // If end time is earlier than start time (and not equal), error.
+                if (end < start && end != start)
+                {
+                    MessageBox.Show("End time cannot be earlier than start time.", "Input Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
                 if (Task == null)
                     Task = new TaskItem();
                 Task.Title = TitleTextBox.Text;

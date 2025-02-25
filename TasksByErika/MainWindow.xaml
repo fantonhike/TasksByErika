@@ -90,13 +90,13 @@
                     <Button x:Name="AddTaskButton" Content="Add Task" Click="AddTaskButton_Click" />
                     <Button x:Name="EditTaskButton" Content="Edit Task" Click="EditTaskButton_Click" Margin="3"/>
                 </StackPanel>
-                <!-- Centered: Copy Task, Paste Task, and Make Daily (all with equal small margins) -->
+                <!-- Centered: Copy Task, Paste Task, and Make Daily -->
                 <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Center">
                     <Button x:Name="CopyTaskButton" Content="Copy Task" Click="CopyTaskButton_Click" Margin="3"/>
                     <Button x:Name="PasteTaskButton" Content="Paste Task" Click="PasteTaskButton_Click" Margin="3"/>
                     <Button x:Name="MakeDailyButton" Content="Make Daily" Click="MakeDailyButton_Click" Margin="3"/>
                 </StackPanel>
-                <!-- Right-aligned: Delete Task and Clear Week (margins adjusted to match left group) -->
+                <!-- Right-aligned: Delete Task and Clear Week -->
                 <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Right">
                     <Button x:Name="DeleteTaskButton" Content="Delete Task" Click="DeleteTaskButton_Click" Margin="3"/>
                     <Button x:Name="ClearWeekButton" Content="Clear Week" Click="ClearWeekButton_Click" Margin="3"/>

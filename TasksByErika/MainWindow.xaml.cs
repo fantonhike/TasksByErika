@@ -373,7 +373,7 @@ namespace OfflineCalendar
             if (!tasksByDate.ContainsKey(selectedDay)) return;
             var tasks = tasksByDate[selectedDay];
             var sortedTasks = tasks.OrderBy(t => t.StartTime).ToList();
-            // For overlap: for one-time tasks, assume an effective range of 20 minutes (10 minutes before and after).
+            // For overlap: for one-time tasks, assume an effective range of 20 minutes (10 before, 10 after).
             List<TimeSpan> rowEndTimes = new List<TimeSpan>();
             Dictionary<TaskItem, int> taskRow = new Dictionary<TaskItem, int>();
             foreach (var task in sortedTasks)
